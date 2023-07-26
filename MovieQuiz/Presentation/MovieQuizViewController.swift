@@ -101,8 +101,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
    
     private func showAnswerResult(isCorrect: Bool) {
-       // yesButtom.isEnabled = false
-       // noButtom.isEnabled = false
         if isCorrect { // 1
             correctAnswers += 1 // 2
         }
@@ -113,9 +111,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
-            /*self.yesButtom.isEnabled = true
-            self.noButtom.isEnabled = true
-            self.imageView.layer.borderWidth = 0*/
             self.showNextQuestionOrResults()
            }//вызов с задержкой 1 сек через диспетчер задач
     }
