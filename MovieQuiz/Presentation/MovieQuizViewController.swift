@@ -6,16 +6,11 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
-    
     @IBOutlet var noButtom: UIButton!
     @IBOutlet var yesButtom: UIButton!
     
-    //private var correctAnswers = 0
-    
     private var presenter: MovieQuizPresenter!
-    //private var questionFactory: QuestionFactory?
     private var alertPresenter: AlertPresenter?
-    private var statisticService: StatisticService?
     
     @IBAction private func yesButtonClicke(_ sender: UIButton) {
         presenter.yesButtonClicke()
@@ -32,12 +27,9 @@ final class MovieQuizViewController: UIViewController {
         
         presenter = MovieQuizPresenter(viewController: self)
         alertPresenter = AlertPresenterImpl(viewController: self)
-        statisticService = StatisticServiceImpl()
-        
         showLoadingIndicator()
     }
-    // MARK: - QuestionFactoryDelegate
-    
+
     func showLoadingIndicator() {
         activityIndicator.startAnimating() // включаем анимацию
     }
@@ -46,28 +38,6 @@ final class MovieQuizViewController: UIViewController {
         activityIndicator.stopAnimating() // выключаем анимацию
     }
     
-    //func didReceiveNextQuestion(question: QuizQuestion?) {
-    //    presenter.didReceiveNextQuestion(question: question)
-    //}
-    
-    //func didFailToLoadData(with error: Error) {
-    //    showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
-    //}
-    
-    //func didLoadDataFromServer() {
-    //    hideLoadingIndicator()
-    //    questionFactory?.requestNextQuestion()
-    //}
-    /*
-    func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            showFinalResults()
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
-    } */
-    
     func show(quiz step: QuizStepViewModel) {
         imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
@@ -75,18 +45,11 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
     }
     
-    func showAnswerResult(isCorrect: Bool) {
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
-        
-        imageView.layer.masksToBounds = true
-        imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-            self.presenter.showNextQuestionOrResults()
-        }//вызов с задержкой 1 сек через диспетчер задач
-    }
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+            imageView.layer.masksToBounds = true
+            imageView.layer.borderWidth = 8
+            imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        }
     
     func showNetworkError(message: String) {
         hideLoadingIndicator()
@@ -97,40 +60,21 @@ final class MovieQuizViewController: UIViewController {
             guard let self = self else { return }
             
             self.presenter.restartGame()
-            self.presenter.questionFactory?.loadData()
         }
         
         alertPresenter?.show(alertModel: model)
     }
     
     func showFinalResults() {
-        statisticService?.store(correct: presenter.correctAnswers, total: presenter.questionsAmount)
-        
         let alertModel = AlertModel(
             title: "Игра окончена!",
-            message: makeResultMessage(),
+            message: presenter.makeResultMessage(),
             buttonText: "Сыграть еще раз!",
             buttonAction: { [weak self] in
                 self?.presenter.restartGame()
             }
         )
         alertPresenter?.show(alertModel: alertModel)
-    }
-    private func makeResultMessage() -> String {
-        guard let statisticService = statisticService, let bestGame = statisticService.bestGame else {
-            assertionFailure("error message")
-            return ""
-        }
-        let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
-        let totalPlayCountline = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-        let currentGameResultLine = "Ваш результат: \(presenter.correctAnswers)\\\(presenter.questionsAmount)"
-        let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)" + "(\(bestGame.date.dateTimeString))"
-        let averangeAccuracyLine = "Средняя точность: \(accuracy)%"
-        
-        let components: [String] = [ currentGameResultLine, totalPlayCountline, bestGameInfoLine, averangeAccuracyLine]
-        let resultMessage = components.joined(separator: "\n")
-        
-        return resultMessage
     }
 }
 
