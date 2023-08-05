@@ -1,7 +1,7 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
-    
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
+
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
@@ -51,29 +51,12 @@ final class MovieQuizViewController: UIViewController {
             imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         }
     
-    func showNetworkError(message: String) {
+    func showNetworkError(alertModel: AlertModel) {
         hideLoadingIndicator()
-        
-        let model = AlertModel(title: "Ошибка",
-                               message: message,
-                               buttonText: "Попробовать еще раз") { [weak self] in
-            guard let self = self else { return }
-            
-            self.presenter.restartGame()
-        }
-        
-        alertPresenter?.show(alertModel: model)
+        alertPresenter?.show(alertModel: alertModel)
     }
     
-    func showFinalResults() {
-        let alertModel = AlertModel(
-            title: "Игра окончена!",
-            message: presenter.makeResultMessage(),
-            buttonText: "Сыграть еще раз!",
-            buttonAction: { [weak self] in
-                self?.presenter.restartGame()
-            }
-        )
+    func showFinalResults(alertModel: AlertModel) {
         alertPresenter?.show(alertModel: alertModel)
     }
 }

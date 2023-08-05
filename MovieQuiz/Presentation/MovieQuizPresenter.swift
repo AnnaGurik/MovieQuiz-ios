@@ -35,7 +35,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func didFailToLoadData(with error: Error) {
         let message = error.localizedDescription
-        viewController?.showNetworkError(message: message)
+        viewController?.showNetworkError(alertModel: getAlertModelForError(message: message))
     }
     
     func yesButtonClicke() {
@@ -48,7 +48,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
-            viewController?.showFinalResults()
+            viewController?.showFinalResults(alertModel: getAlertModelForFinal())
         } else {
             self.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
@@ -113,6 +113,29 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             guard let self = self else { return }
             self.proceedToNextQuestionOrResults()
         }
+    }
+    
+    private func getAlertModelForError(message: String) -> AlertModel {
+        let model = AlertModel(title: "Ошибка",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            
+            self.restartGame()
+        }
+        return model
+    }
+    
+    private func getAlertModelForFinal() -> AlertModel {
+        let alertModel = AlertModel(
+            title: "Игра окончена!",
+            message: makeResultMessage(),
+            buttonText: "Сыграть еще раз!",
+            buttonAction: { [weak self] in
+                self?.restartGame()
+            }
+        )
+        return alertModel
     }
     
     func makeResultMessage() -> String {
