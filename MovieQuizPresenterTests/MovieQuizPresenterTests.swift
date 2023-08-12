@@ -1,8 +1,8 @@
 //
-//  PresenterTests.swift
-//  PresenterTests
+//  MovieQuizPresenterTests.swift
+//  MovieQuizPresenterTests
 //
-//  Created by Анна Гурьянова on 05.08.2023.
+//  Created by Анна Гурьянова on 12.08.2023.
 //
 
 import XCTest
