@@ -74,7 +74,6 @@ extension StatisticServiceImpl: StatisticService {
             guard
                 let data = userDefaults.data(forKey: Keys.bestGame.rawValue),
                 let bestGame = try? decoder.decode(BestGame.self, from: data) else {
-                //assertionFailure("error message")
                 return nil
             }
             return bestGame
